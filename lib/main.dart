@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -13,7 +12,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -83,9 +81,68 @@ class HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     TextButton(
+                      onPressed: () async {
+                        showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            titleTextStyle: const TextStyle(color: Colors.red),
+                            title: const Text('Are you sure?'),
+                            content: const Text(
+                                "Are you sure you want to delete this post?"),
+                            actions: <Widget>[
+                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('NO'),),
+                              TextButton(
+                                onPressed: () async {
+                                  if (await _removeItem(path)) {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                        titleTextStyle:
+                                            const TextStyle(color: Colors.red),
+                                        title: const Text('Deleted'),
+                                        content: const Text('Item deleted'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, 'OK'),
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  } else {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                        titleTextStyle:
+                                            const TextStyle(color: Colors.red),
+                                        title: const Text('Error'),
+                                        content: const Text(
+                                            'Something went wrong while deleting item.'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, 'OK'),
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: const Text('YES', style: TextStyle(color: Colors.red),),
+                              ),
 
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Delete', style: TextStyle(color: Colors.red),),
+                            ],
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -122,7 +179,11 @@ class HomePageState extends State<HomePage> {
                         color: Colors.white),
                   ),
                   Row(
-                    children: [ Text(licence), const Text(" - "), Text(location)],
+                    children: [
+                      Text(licence),
+                      const Text(" - "),
+                      Text(location)
+                    ],
                   ),
                 ],
               ),
@@ -157,6 +218,25 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  Future<bool> _removeItem(String path) async {
+    path = "path=..${path.split("..")[1]}";
+
+    final url = Uri.parse(
+        "http://10.59.138.141:8080/?$path"); //http://simplexflow.nl/minis/   http://10.59.138.58:8080/
+
+    final response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      Navigator.popAndPushNamed(context, '/');
+
+      print("200");
+      return true;
+    } else {
+      print("not 200");
+      return false;
+    }
+  }
+
   void _updateList() async {
     final response = await http.get(Uri.parse('http://simplexflow.nl/minis/'));
     elementList.clear();
@@ -180,14 +260,14 @@ class HomePageState extends State<HomePage> {
           elementList.insert(0, _addElement(title, location, path, licence));
         });
       }
+      print(" ${DateTime.timestamp()} : '\x1B[33mupdated\x1B[0m'");
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
       throw Exception('Failed to reach server');
     }
-
-
   }
+
 
   @override
   void didChangeDependencies() {
@@ -198,9 +278,9 @@ class HomePageState extends State<HomePage> {
 
     // Check if the current route is the homepage
     if (currentRoute?.settings.name == '/') {
-      // Run your function here
       _updateList();
     }
+
   }
 
   @override
@@ -231,7 +311,7 @@ class HomePageState extends State<HomePage> {
                 }
               },
             ),
-          )
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -271,8 +351,8 @@ class UploadPageState extends State<UploadPage> {
       });
     }
   }
-  Future<void> _selectPicture() async {
 
+  Future<void> _selectPicture() async {
     final imageFile = await ImagePicker().pickMedia();
 
     if (imageFile != null) {
@@ -282,14 +362,13 @@ class UploadPageState extends State<UploadPage> {
     }
   }
 
-
   Future<bool> _saveImage(String path) async {
     String Title = _titleController.text;
     String licence = _licenceController.text;
     String location = selectedLocation;
 
     final url = Uri.parse(
-        "http://simplexflow.nl/minis/"); //http://simplexflow.nl/minis/   http://10.59.138.58:8080/
+        "http://simplexflow.nl/minis/"); //http://simplexflow.nl/minis/   http://10.59.138.141:8080/
 
     final request = http.MultipartRequest('POST', url);
 
@@ -401,18 +480,21 @@ class UploadPageState extends State<UploadPage> {
                       ],
                     ),
                     const SizedBox(height: 20.0),
-
                     _imageFile == null
-                        ? Column( children: [ElevatedButton(
-                      onPressed: _takePicture,
-                      child: const Text('Open Camera'),
-                    ),
-                      const Text("or"),
-                      TextButton(
-                        onPressed: _selectPicture,
-                        child: const Text('Select image '),
-                      ),
-                      const SizedBox(height: 20.0),],)
+                        ? Column(
+                            children: [
+                              ElevatedButton(
+                                onPressed: _takePicture,
+                                child: const Text('Open Camera'),
+                              ),
+                              const Text("or"),
+                              TextButton(
+                                onPressed: _selectPicture,
+                                child: const Text('Select image '),
+                              ),
+                              const SizedBox(height: 20.0),
+                            ],
+                          )
                         : Image.file(
                             _imageFile!,
                             height: screenHeight / 2,
@@ -476,20 +558,24 @@ class UploadPageState extends State<UploadPage> {
                                   _titleController.text != "" &&
                                   selectedLocation != " ") {
                                 if (await _saveImage(_imageFile!.path)) {
-                                  Navigator.pop(context);
+                                  Navigator.popAndPushNamed(context, '/');
                                 } else {
-                                  AlertDialog(
-                                    titleTextStyle:
-                                        const TextStyle(color: Colors.red),
-                                    title: const Text('Error'),
-                                    content: const Text('Please try again'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, 'OK'),
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
+                                  showDialog<String>(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        AlertDialog(
+                                      titleTextStyle:
+                                          const TextStyle(color: Colors.red),
+                                      title: const Text('Error'),
+                                      content: const Text('Please try again'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'OK'),
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    ),
                                   );
                                 }
                               } else {
