@@ -222,7 +222,7 @@ class HomePageState extends State<HomePage> {
     path = "path=..${path.split("..")[1]}";
 
     final url = Uri.parse(
-        "http://10.59.138.141:8080/?$path"); //http://simplexflow.nl/minis/   http://10.59.138.58:8080/
+        "http://simplexflow.nl/minis/?$path"); //http://simplexflow.nl/minis/   http://10.59.138.58:8080/
 
     final response = await http.delete(url);
 
@@ -353,7 +353,7 @@ class UploadPageState extends State<UploadPage> {
   }
 
   Future<void> _selectPicture() async {
-    final imageFile = await ImagePicker().pickMedia();
+    final imageFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (imageFile != null) {
       setState(() {
