@@ -94,21 +94,9 @@ class HomePageState extends State<HomePage> {
                               TextButton(
                                 onPressed: () async {
                                   if (await _removeItem(path)) {
-                                    showDialog<String>(
-                                      context: context,
-                                      builder: (BuildContext context) =>
-                                          AlertDialog(
-                                        titleTextStyle:
-                                            const TextStyle(color: Colors.red),
-                                        title: const Text('Deleted'),
-                                        content: const Text('Item deleted'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context, 'OK'),
-                                            child: const Text('OK'),
-                                          ),
-                                        ],
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('post deleted'),
                                       ),
                                     );
                                   } else {
@@ -227,12 +215,14 @@ class HomePageState extends State<HomePage> {
     final response = await http.delete(url);
 
     if (response.statusCode == 200) {
-      Navigator.popAndPushNamed(context, '/');
 
-      print("200");
+      Navigator.pop(context);
+      Navigator.pop(context);
+      _updateList();
+
+
       return true;
     } else {
-      print("not 200");
       return false;
     }
   }
@@ -301,14 +291,32 @@ class HomePageState extends State<HomePage> {
           SizedBox(
             height: screenHeight - 100,
             width: screenWidth,
-            child: ListView.builder(
-              itemCount: elementList.length,
-              itemBuilder: (context, index) {
-                if (index < elementList.length) {
-                  return elementList[index];
-                } else {
-                  return const SizedBox.shrink();
-                }
+            child: RefreshIndicator(
+              child: ListView.builder(
+                itemCount: elementList.length,
+                itemBuilder: (context, index) {
+                  if (index < elementList.length) {
+                    return elementList[index];
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
+              onRefresh: () {
+                return Future.delayed(
+                  const Duration(seconds: 1),
+                      () {
+                    setState(() {
+                      _updateList();
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Page Refreshed'),
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),
@@ -559,6 +567,11 @@ class UploadPageState extends State<UploadPage> {
                                   selectedLocation != " ") {
                                 if (await _saveImage(_imageFile!.path)) {
                                   Navigator.popAndPushNamed(context, '/');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('post Uploaded'),
+                                    ),
+                                  );
                                 } else {
                                   showDialog<String>(
                                     context: context,
