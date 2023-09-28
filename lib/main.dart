@@ -309,12 +309,21 @@ class HomePageState extends State<HomePage> {
                     setState(() {
                       _updateList();
                     });
+                    if(DateTime.now().hour == 15){ // Easter egg
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('tijd voor Chicken Nuggies!!!'),
+                        ),
+                      );
+                    }else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Page Refreshed'),
+                        ),
+                      );
+                    }
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Page Refreshed'),
-                      ),
-                    );
+
                   },
                 );
               },
@@ -322,6 +331,7 @@ class HomePageState extends State<HomePage> {
           ),
         ],
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: _SwitchPage,
         child: const Icon(Icons.add_box),
