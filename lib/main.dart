@@ -25,8 +25,11 @@ class MyApp extends StatelessWidget {
           bodyMedium: TextStyle(fontSize: 14.0, color: Colors.white),
         ),
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent)
-            .copyWith(background: const Color.fromARGB(255, 69, 69, 69)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 255, 89, 0),
+          primary: const Color.fromARGB(255, 255, 252, 242),
+          onPrimary: Colors.white,
+        ).copyWith(background: const Color.fromARGB(255, 64, 61, 57)),
       ),
       routes: {
         '/': (context) => const HomePage(),
@@ -44,7 +47,14 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  final TextEditingController _titleSearchController = TextEditingController();
+  final TextEditingController _licenceSearchController =
+      TextEditingController();
+  String selectedSearchLocation = '';
+
   List<Widget> elementList = [];
+
+  var boolFilter = false;
 
   Widget _addElement(
       String title, String location, String path, String licence) {
@@ -90,7 +100,10 @@ class HomePageState extends State<HomePage> {
                             content: const Text(
                                 "Are you sure you want to delete this post?"),
                             actions: <Widget>[
-                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('NO'),),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('NO'),
+                              ),
                               TextButton(
                                 onPressed: () async {
                                   if (await _removeItem(path)) {
@@ -120,9 +133,11 @@ class HomePageState extends State<HomePage> {
                                     );
                                   }
                                 },
-                                child: const Text('YES', style: TextStyle(color: Colors.red),),
+                                child: const Text(
+                                  'YES',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ),
-
                             ],
                           ),
                         );
@@ -134,7 +149,8 @@ class HomePageState extends State<HomePage> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Ok'),
+                      child: const Text('Ok',
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 )
@@ -144,7 +160,7 @@ class HomePageState extends State<HomePage> {
         },
         style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(
-                const Color.fromARGB(255, 0, 0, 169)),
+                const Color.fromARGB(255, 255, 85, 0)),
             shape: MaterialStateProperty.all(const RoundedRectangleBorder(
               borderRadius: BorderRadius.zero,
               side: BorderSide.none,
@@ -215,11 +231,9 @@ class HomePageState extends State<HomePage> {
     final response = await http.delete(url);
 
     if (response.statusCode == 200) {
-
       Navigator.pop(context);
       Navigator.pop(context);
-      _updateList();
-
+      _updateListWithSearch();
 
       return true;
     } else {
@@ -227,6 +241,54 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  void _updateListWithSearch() async {
+    var title = _titleSearchController.text;
+    var licence = _licenceSearchController.text;
+    var location = selectedSearchLocation;
+
+    final url = Uri.parse(
+        "http://10.59.138.158:8080?title=$title&licence=$licence&location=$location"); //http://simplexflow.nl/minis/
+    //TODO: remove debug!!
+    print(url);
+    final response = await http.get(url);
+    elementList.clear();
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      final data = jsonDecode(response.body);
+      setState(() {
+        for (var i = 0; i < data.length; i++) {
+          var data2 = data[i];
+
+          // Clear the list before adding new elements
+          // Access specific values using keys
+          String location = data2["location"];
+          String title = data2["title"];
+          String pathData = data2["path"];
+          String path = 'http://simplexflow.nl/$pathData';
+          String licence = data2["licence"];
+
+          // Create widgets or perform any other actions with the extracted data
+          elementList.insert(0, _addElement(title, location, path, licence));
+        }
+      });
+      //TODO: remove debug!!
+      print(" ${DateTime.timestamp()} : '\x1B[33mupdated with search\x1B[0m'");
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to reach server');
+    }
+  }
+
+  void _clearFilter() {
+    _titleSearchController.clear();
+    _licenceSearchController.clear();
+    selectedSearchLocation = '';
+    _updateListWithSearch();
+  }
+
+  //TODO: Remove unused function
   void _updateList() async {
     final response = await http.get(Uri.parse('http://simplexflow.nl/minis/'));
     elementList.clear();
@@ -258,7 +320,6 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -268,9 +329,8 @@ class HomePageState extends State<HomePage> {
 
     // Check if the current route is the homepage
     if (currentRoute?.settings.name == '/') {
-      _updateList();
+      _updateListWithSearch();
     }
-
   }
 
   @override
@@ -289,8 +349,182 @@ class HomePageState extends State<HomePage> {
       body: Column(
         children: [
           SizedBox(
-            height: screenHeight - 100,
-            width: screenWidth,
+            height: 50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: screenWidth - 50,
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    controller: _titleSearchController,
+                    onSubmitted: (value) {
+                      setState(() {
+                        _updateListWithSearch();
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.search),
+                      iconColor: Colors.white,
+                      border: UnderlineInputBorder(),
+                      hintText: 'Search title',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  onPressed: () {
+                    setState(() {
+                      boolFilter = !boolFilter;
+                    });
+                  },
+                  icon: const Icon(Icons.filter_list),
+                  color: Colors.white,
+                )
+              ],
+            ),
+          ),
+          if (boolFilter) ...{
+            const SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+                height: 110,
+                width: screenWidth,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          width: 40,
+                        ),
+                        SizedBox(
+                          height: 35,
+                          width: screenWidth - 230,
+                          child: TextField(
+                            style: const TextStyle(color: Colors.white),
+                            onSubmitted: (value) {
+                              setState(() {
+                                _updateListWithSearch();
+                              });
+                            },
+                            controller: _licenceSearchController,
+                            decoration: const InputDecoration(
+                              border: UnderlineInputBorder(),
+                              hintText: 'Licence',
+                              hintStyle: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 50,
+                          width: screenWidth - 240,
+                          child: DropdownButton<String>(
+                            padding: EdgeInsets.fromLTRB(20, 5, 0, 0),
+                            value: selectedSearchLocation,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedSearchLocation = newValue!;
+                              });
+                            },
+                            items: const [
+                              DropdownMenuItem<String>(
+                                value: "",
+                                child: Text(
+                                  "location",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: "valkenswaard",
+                                child: Text("Valkenswaard"),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: "eindhoven",
+                                child: Text("Eindhoven"),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: "overige",
+                                child: Text("Overige"),
+                              ),
+                            ],
+                            hint: const Text(
+                              "Location",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            itemHeight: 50,
+                            // Optional hint text
+                            style: const TextStyle(color: Colors.white),
+                            dropdownColor: Colors.grey,
+
+                            // Optional background color for the dropdown menu
+                            icon: const Icon(Icons.arrow_drop_down,
+                                color: Colors.white), // Optional dropdown icon
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SizedBox(
+                          width: screenWidth - 250,
+                          child: TextButton(
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        const Color.fromARGB(255, 255, 89, 0)),
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
+                                  side: BorderSide.none,
+                                ))),
+                            onPressed: _clearFilter,
+                            child: const Text(
+                              "clear",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: screenWidth - 250,
+                          child: TextButton(
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<
+                                        Color>(
+                                    const Color.fromARGB(58, 255, 255, 255)),
+                                shape: MaterialStateProperty.all(
+                                    const RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
+                                  side: BorderSide.none,
+                                ))),
+                            onPressed: () {
+                              setState(() {
+                                _updateListWithSearch();
+                              });
+                            },
+                            child: const Text(
+                              "Search",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ))
+          },
+          const SizedBox(
+            height: 10,
+          ),
+          Expanded(
             child: RefreshIndicator(
               child: ListView.builder(
                 itemCount: elementList.length,
@@ -305,25 +539,24 @@ class HomePageState extends State<HomePage> {
               onRefresh: () {
                 return Future.delayed(
                   const Duration(seconds: 1),
-                      () {
+                  () {
                     setState(() {
-                      _updateList();
+                      _updateListWithSearch();
                     });
-                    if(DateTime.now().hour == 15){ // Easter egg
+                    if (DateTime.now().hour == 15) {
+                      // Easter egg
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('tijd voor Chicken Nuggies!!!'),
                         ),
                       );
-                    }else{
+                    } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Page Refreshed'),
                         ),
                       );
                     }
-
-
                   },
                 );
               },
@@ -331,7 +564,6 @@ class HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: _SwitchPage,
         child: const Icon(Icons.add_box),
@@ -371,7 +603,8 @@ class UploadPageState extends State<UploadPage> {
   }
 
   Future<void> _selectPicture() async {
-    final imageFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final imageFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (imageFile != null) {
       setState(() {
@@ -406,6 +639,28 @@ class UploadPageState extends State<UploadPage> {
     } else {
       return false;
     }
+  }
+
+  Future<bool> _licenceDuplicateCheck() async{
+
+    String licence = _licenceController.text;
+    final url = Uri.parse("http://10.59.138.158:8080");
+    final response = await http.post(url, body: {"licence": licence});
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        if(data["code"]){
+          return true;
+        }else{
+          return false;
+        }
+
+      } else {
+        throw Exception("Failed to reach server");
+      }
+
+
+
   }
 
   @override
@@ -575,31 +830,94 @@ class UploadPageState extends State<UploadPage> {
                                   _licenceController.text != "" &&
                                   _titleController.text != "" &&
                                   selectedLocation != " ") {
-                                if (await _saveImage(_imageFile!.path)) {
-                                  Navigator.popAndPushNamed(context, '/');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('post Uploaded'),
-                                    ),
-                                  );
-                                } else {
+
+                                print("result: ${await _licenceDuplicateCheck()}");
+
+                                if (await _licenceDuplicateCheck()) {
                                   showDialog<String>(
                                     context: context,
                                     builder: (BuildContext context) =>
                                         AlertDialog(
                                       titleTextStyle:
                                           const TextStyle(color: Colors.red),
-                                      title: const Text('Error'),
-                                      content: const Text('Please try again'),
+                                      title: const Text('Duplicate licence'),
+                                      content: const Text(
+                                          'This licence is already used. \nWould you like to upload this post anyways?'),
                                       actions: <Widget>[
                                         TextButton(
                                           onPressed: () =>
-                                              Navigator.pop(context, 'OK'),
-                                          child: const Text('OK'),
+                                              Navigator.pop(context, 'NO'),
+                                          child: const Text('NO'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            if (await _saveImage(
+                                                _imageFile!.path)) {
+                                              Navigator.popAndPushNamed(
+                                                  context, '/');
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content:
+                                                      Text('post Uploaded'),
+                                                ),
+                                              );
+                                            } else {
+                                              showDialog<String>(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        AlertDialog(
+                                                  titleTextStyle:
+                                                      const TextStyle(
+                                                          color: Colors.red),
+                                                  title: const Text('Error'),
+                                                  content: const Text(
+                                                      'Please try again'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context, 'OK'),
+                                                      child: const Text('OK'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: const Text('YES'),
                                         ),
                                       ],
                                     ),
                                   );
+                                } else {
+                                  if (await _saveImage(_imageFile!.path)) {
+                                    Navigator.popAndPushNamed(context, '/');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('post Uploaded'),
+                                      ),
+                                    );
+                                  } else {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                        titleTextStyle:
+                                            const TextStyle(color: Colors.red),
+                                        title: const Text('Error'),
+                                        content: const Text('Please try again'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, 'OK'),
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
                                 }
                               } else {
                                 showDialog<String>(
