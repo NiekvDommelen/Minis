@@ -230,7 +230,7 @@ class HomePageState extends State<HomePage> {
 
       Navigator.pop(context);
       Navigator.pop(context);
-      _updateList();
+      _updateListWithSearch();
 
 
       return true;
@@ -243,6 +243,8 @@ class HomePageState extends State<HomePage> {
     var title = _titleSearchController.text;
     var licence = _licenceSearchController.text;
     var location = selectedSearchLocation;
+
+
     final url = Uri.parse("http://10.59.138.158:8080?title=$title&licence=$licence&location=$location"); //http://simplexflow.nl/minis/
     //TODO: remove debug!!
     print(url);
@@ -253,10 +255,12 @@ class HomePageState extends State<HomePage> {
       // then parse the JSON.
       final data = jsonDecode(response.body);
       print(data);
+      print(elementList);
+      setState(() {
       for (var i = 0; i < data.length; i++) {
         var data2 = data[i];
 
-        setState(() {
+
           // Clear the list before adding new elements
           // Access specific values using keys
           String location = data2["location"];
@@ -267,8 +271,10 @@ class HomePageState extends State<HomePage> {
 
           // Create widgets or perform any other actions with the extracted data
           elementList.insert(0, _addElement(title, location, path, licence));
-        });
+
       }
+      });
+      //TODO: remove debug!!
       print(" ${DateTime.timestamp()} : '\x1B[33mupdated with search\x1B[0m'");
 
     } else {
@@ -278,6 +284,14 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  void _clearFilter() {
+    _titleSearchController.clear();
+    _licenceSearchController.clear();
+    selectedSearchLocation = '';
+    _updateListWithSearch();
+  }
+
+  //TODO: Remove unused function
   void _updateList() async {
     final response = await http.get(Uri.parse('http://simplexflow.nl/minis/'));
     elementList.clear();
@@ -309,6 +323,19 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Get the current route
+    final currentRoute = ModalRoute.of(context);
+
+    // Check if the current route is the homepage
+    if (currentRoute?.settings.name == '/') {
+      _updateListWithSearch();
+    }
+
+  }
 
   @override
 
@@ -336,7 +363,13 @@ class HomePageState extends State<HomePage> {
                   width: screenWidth - 50,
 
                   child: TextField(
+                    style: const TextStyle(color: Colors.white),
                     controller: _titleSearchController,
+                    onSubmitted: (value) {
+                      setState(() {
+                        _updateListWithSearch();
+                      });
+                    },
                     decoration: const InputDecoration(
 
                       icon: Icon(Icons.search),
@@ -344,6 +377,7 @@ class HomePageState extends State<HomePage> {
                       border: UnderlineInputBorder(),
                       hintText: 'Search title',
                       hintStyle: TextStyle(color: Colors.grey),
+
                     ),
                   ),
                 ),
@@ -353,7 +387,8 @@ class HomePageState extends State<HomePage> {
                   setState(() {
                     boolFilter = !boolFilter;
                   });
-                }, icon: const Icon(Icons.filter_list),
+                },
+                  icon: const Icon(Icons.filter_list),
                   color: Colors.white,
                 )
               ],
@@ -373,14 +408,24 @@ class HomePageState extends State<HomePage> {
                     Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        const SizedBox(
+                          width: 40,
+                        ),
+
                         SizedBox(
                           height: 35,
-                          width: screenWidth - 200,
+                          width: screenWidth - 230,
                           child: TextField(
+                          style: const TextStyle(color: Colors.white),
+                          onSubmitted: (value) {
+                            setState(() {
+                              _updateListWithSearch();
+                            });
+                          },
                           controller: _licenceSearchController,
                           decoration: const InputDecoration(
 
-                            icon: Icon(Icons.filter_list),
+
                             border: UnderlineInputBorder(),
                             hintText: 'Licence',
                             hintStyle: TextStyle(color: Colors.grey),
@@ -394,7 +439,7 @@ class HomePageState extends State<HomePage> {
 
 
                             padding: EdgeInsets.fromLTRB(20, 5, 0, 0),
-                            value: null,
+                            value: selectedSearchLocation,
                             onChanged: (newValue) {
                               setState(() {
                                 selectedSearchLocation = newValue!;
@@ -402,8 +447,8 @@ class HomePageState extends State<HomePage> {
                             },
                             items: const [
                               DropdownMenuItem<String>(
-                                value: " ",
-                                child: Text(""),
+                                value: "",
+                                child: Text("location", style: TextStyle(color: Colors.grey),),
                               ),
                               DropdownMenuItem<String>(
                                 value: "valkenswaard",
@@ -449,7 +494,7 @@ class HomePageState extends State<HomePage> {
                                 ))),
 
 
-                          onPressed: () {  },
+                          onPressed: _clearFilter,
                           child: const Text("clear", style: TextStyle(color: Colors.white),),
 
 
@@ -506,7 +551,7 @@ class HomePageState extends State<HomePage> {
                   const Duration(seconds: 1),
                       () {
                     setState(() {
-                      _updateList();
+                      _updateListWithSearch();
                     });
                     if(DateTime.now().hour == 15){ // Easter egg
                       ScaffoldMessenger.of(context).showSnackBar(
