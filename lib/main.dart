@@ -25,11 +25,11 @@ class MyApp extends StatelessWidget {
           bodyMedium: TextStyle(fontSize: 14.0, color: Colors.white),
         ),
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(
-            255, 255, 89, 0),
-        primary: const Color.fromARGB(255, 255, 252, 242), onPrimary: Colors.white,)
-            .copyWith(background: const Color.fromARGB(255, 64, 61, 57)),
-
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 255, 89, 0),
+          primary: const Color.fromARGB(255, 255, 252, 242),
+          onPrimary: Colors.white,
+        ).copyWith(background: const Color.fromARGB(255, 64, 61, 57)),
       ),
       routes: {
         '/': (context) => const HomePage(),
@@ -40,7 +40,6 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-
   const HomePage({super.key});
 
   @override
@@ -49,14 +48,13 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   final TextEditingController _titleSearchController = TextEditingController();
-  final TextEditingController _licenceSearchController = TextEditingController();
+  final TextEditingController _licenceSearchController =
+      TextEditingController();
   String selectedSearchLocation = '';
 
   List<Widget> elementList = [];
 
   var boolFilter = false;
-
-
 
   Widget _addElement(
       String title, String location, String path, String licence) {
@@ -102,7 +100,10 @@ class HomePageState extends State<HomePage> {
                             content: const Text(
                                 "Are you sure you want to delete this post?"),
                             actions: <Widget>[
-                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('NO'),),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('NO'),
+                              ),
                               TextButton(
                                 onPressed: () async {
                                   if (await _removeItem(path)) {
@@ -132,9 +133,11 @@ class HomePageState extends State<HomePage> {
                                     );
                                   }
                                 },
-                                child: const Text('YES', style: TextStyle(color: Colors.red),),
+                                child: const Text(
+                                  'YES',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ),
-
                             ],
                           ),
                         );
@@ -146,7 +149,8 @@ class HomePageState extends State<HomePage> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Ok', style: TextStyle(color: Colors.white)),
+                      child: const Text('Ok',
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 )
@@ -227,11 +231,9 @@ class HomePageState extends State<HomePage> {
     final response = await http.delete(url);
 
     if (response.statusCode == 200) {
-
       Navigator.pop(context);
       Navigator.pop(context);
       _updateListWithSearch();
-
 
       return true;
     } else {
@@ -244,8 +246,8 @@ class HomePageState extends State<HomePage> {
     var licence = _licenceSearchController.text;
     var location = selectedSearchLocation;
 
-
-    final url = Uri.parse("http://10.59.138.158:8080?title=$title&licence=$licence&location=$location"); //http://simplexflow.nl/minis/
+    final url = Uri.parse(
+        "http://10.59.138.158:8080?title=$title&licence=$licence&location=$location"); //http://simplexflow.nl/minis/
     //TODO: remove debug!!
     print(url);
     final response = await http.get(url);
@@ -254,12 +256,9 @@ class HomePageState extends State<HomePage> {
       // If the server did return a 200 OK response,
       // then parse the JSON.
       final data = jsonDecode(response.body);
-      print(data);
-      print(elementList);
       setState(() {
-      for (var i = 0; i < data.length; i++) {
-        var data2 = data[i];
-
+        for (var i = 0; i < data.length; i++) {
+          var data2 = data[i];
 
           // Clear the list before adding new elements
           // Access specific values using keys
@@ -271,12 +270,10 @@ class HomePageState extends State<HomePage> {
 
           // Create widgets or perform any other actions with the extracted data
           elementList.insert(0, _addElement(title, location, path, licence));
-
-      }
+        }
       });
       //TODO: remove debug!!
       print(" ${DateTime.timestamp()} : '\x1B[33mupdated with search\x1B[0m'");
-
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
@@ -334,11 +331,9 @@ class HomePageState extends State<HomePage> {
     if (currentRoute?.settings.name == '/') {
       _updateListWithSearch();
     }
-
   }
 
   @override
-
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -355,13 +350,11 @@ class HomePageState extends State<HomePage> {
         children: [
           SizedBox(
             height: 50,
-
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
                   width: screenWidth - 50,
-
                   child: TextField(
                     style: const TextStyle(color: Colors.white),
                     controller: _titleSearchController,
@@ -371,73 +364,64 @@ class HomePageState extends State<HomePage> {
                       });
                     },
                     decoration: const InputDecoration(
-
                       icon: Icon(Icons.search),
                       iconColor: Colors.white,
                       border: UnderlineInputBorder(),
                       hintText: 'Search title',
                       hintStyle: TextStyle(color: Colors.grey),
-
                     ),
                   ),
                 ),
                 IconButton(
                   padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                   onPressed: () {
-                  setState(() {
-                    boolFilter = !boolFilter;
-                  });
-                },
+                    setState(() {
+                      boolFilter = !boolFilter;
+                    });
+                  },
                   icon: const Icon(Icons.filter_list),
                   color: Colors.white,
                 )
               ],
             ),
           ),
-
-          if(boolFilter)...{
-           const SizedBox(
+          if (boolFilter) ...{
+            const SizedBox(
               height: 10,
             ),
             SizedBox(
-              height: 110,
-              width: screenWidth,
-              child: Column(
+                height: 110,
+                width: screenWidth,
+                child: Column(
                   children: [
-
                     Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         const SizedBox(
                           width: 40,
                         ),
-
                         SizedBox(
                           height: 35,
                           width: screenWidth - 230,
                           child: TextField(
-                          style: const TextStyle(color: Colors.white),
-                          onSubmitted: (value) {
-                            setState(() {
-                              _updateListWithSearch();
-                            });
-                          },
-                          controller: _licenceSearchController,
-                          decoration: const InputDecoration(
-
-
-                            border: UnderlineInputBorder(),
-                            hintText: 'Licence',
-                            hintStyle: TextStyle(color: Colors.grey),
+                            style: const TextStyle(color: Colors.white),
+                            onSubmitted: (value) {
+                              setState(() {
+                                _updateListWithSearch();
+                              });
+                            },
+                            controller: _licenceSearchController,
+                            decoration: const InputDecoration(
+                              border: UnderlineInputBorder(),
+                              hintText: 'Licence',
+                              hintStyle: TextStyle(color: Colors.grey),
+                            ),
                           ),
-                        ),
                         ),
                         SizedBox(
                           height: 50,
                           width: screenWidth - 240,
                           child: DropdownButton<String>(
-
-
                             padding: EdgeInsets.fromLTRB(20, 5, 0, 0),
                             value: selectedSearchLocation,
                             onChanged: (newValue) {
@@ -448,7 +432,10 @@ class HomePageState extends State<HomePage> {
                             items: const [
                               DropdownMenuItem<String>(
                                 value: "",
-                                child: Text("location", style: TextStyle(color: Colors.grey),),
+                                child: Text(
+                                  "location",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
                               ),
                               DropdownMenuItem<String>(
                                 value: "valkenswaard",
@@ -463,7 +450,10 @@ class HomePageState extends State<HomePage> {
                                 child: Text("Overige"),
                               ),
                             ],
-                            hint: const Text("Location", style: TextStyle(color: Colors.grey),),
+                            hint: const Text(
+                              "Location",
+                              style: TextStyle(color: Colors.grey),
+                            ),
                             itemHeight: 50,
                             // Optional hint text
                             style: const TextStyle(color: Colors.white),
@@ -472,7 +462,8 @@ class HomePageState extends State<HomePage> {
                             // Optional background color for the dropdown menu
                             icon: const Icon(Icons.arrow_drop_down,
                                 color: Colors.white), // Optional dropdown icon
-                          ),)
+                          ),
+                        )
                       ],
                     ),
                     SizedBox(
@@ -480,56 +471,55 @@ class HomePageState extends State<HomePage> {
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
                       children: [
                         SizedBox(
                           width: screenWidth - 250,
                           child: TextButton(
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all<Color>(
-                                    const Color.fromARGB(255, 255, 89, 0)),
-                                shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        const Color.fromARGB(255, 255, 89, 0)),
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                   side: BorderSide.none,
                                 ))),
-
-
-                          onPressed: _clearFilter,
-                          child: const Text("clear", style: TextStyle(color: Colors.white),),
-
-
+                            onPressed: _clearFilter,
+                            child: const Text(
+                              "clear",
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
-                          SizedBox(
+                        SizedBox(
                           width: screenWidth - 250,
                           child: TextButton(
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all<Color>(
+                                backgroundColor: MaterialStateProperty.all<
+                                        Color>(
                                     const Color.fromARGB(58, 255, 255, 255)),
-                                shape: MaterialStateProperty.all(const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                shape: MaterialStateProperty.all(
+                                    const RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                   side: BorderSide.none,
                                 ))),
-
-
                             onPressed: () {
                               setState(() {
                                 _updateListWithSearch();
                               });
-
-                              },
-                            child: const Text("Search", style: TextStyle(color: Colors.white),),
-
-
+                            },
+                            child: const Text(
+                              "Search",
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
-                      ),
+                        ),
                       ],
                     )
-
                   ],
-                )
-              )
-
+                ))
           },
           const SizedBox(
             height: 10,
@@ -549,25 +539,24 @@ class HomePageState extends State<HomePage> {
               onRefresh: () {
                 return Future.delayed(
                   const Duration(seconds: 1),
-                      () {
+                  () {
                     setState(() {
                       _updateListWithSearch();
                     });
-                    if(DateTime.now().hour == 15){ // Easter egg
+                    if (DateTime.now().hour == 15) {
+                      // Easter egg
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('tijd voor Chicken Nuggies!!!'),
                         ),
                       );
-                    }else{
+                    } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Page Refreshed'),
                         ),
                       );
                     }
-
-
                   },
                 );
               },
@@ -575,7 +564,6 @@ class HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: _SwitchPage,
         child: const Icon(Icons.add_box),
@@ -615,7 +603,8 @@ class UploadPageState extends State<UploadPage> {
   }
 
   Future<void> _selectPicture() async {
-    final imageFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final imageFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (imageFile != null) {
       setState(() {
@@ -650,6 +639,28 @@ class UploadPageState extends State<UploadPage> {
     } else {
       return false;
     }
+  }
+
+  Future<bool> _licenceDuplicateCheck() async{
+
+    String licence = _licenceController.text;
+    final url = Uri.parse("http://10.59.138.158:8080");
+    final response = await http.post(url, body: {"licence": licence});
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        if(data["code"]){
+          return true;
+        }else{
+          return false;
+        }
+
+      } else {
+        throw Exception("Failed to reach server");
+      }
+
+
+
   }
 
   @override
@@ -819,31 +830,94 @@ class UploadPageState extends State<UploadPage> {
                                   _licenceController.text != "" &&
                                   _titleController.text != "" &&
                                   selectedLocation != " ") {
-                                if (await _saveImage(_imageFile!.path)) {
-                                  Navigator.popAndPushNamed(context, '/');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('post Uploaded'),
-                                    ),
-                                  );
-                                } else {
+
+                                print("result: ${await _licenceDuplicateCheck()}");
+
+                                if (await _licenceDuplicateCheck()) {
                                   showDialog<String>(
                                     context: context,
                                     builder: (BuildContext context) =>
                                         AlertDialog(
                                       titleTextStyle:
                                           const TextStyle(color: Colors.red),
-                                      title: const Text('Error'),
-                                      content: const Text('Please try again'),
+                                      title: const Text('Duplicate licence'),
+                                      content: const Text(
+                                          'This licence is already used. \nWould you like to upload this post anyways?'),
                                       actions: <Widget>[
                                         TextButton(
                                           onPressed: () =>
-                                              Navigator.pop(context, 'OK'),
-                                          child: const Text('OK'),
+                                              Navigator.pop(context, 'NO'),
+                                          child: const Text('NO'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            if (await _saveImage(
+                                                _imageFile!.path)) {
+                                              Navigator.popAndPushNamed(
+                                                  context, '/');
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content:
+                                                      Text('post Uploaded'),
+                                                ),
+                                              );
+                                            } else {
+                                              showDialog<String>(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        AlertDialog(
+                                                  titleTextStyle:
+                                                      const TextStyle(
+                                                          color: Colors.red),
+                                                  title: const Text('Error'),
+                                                  content: const Text(
+                                                      'Please try again'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context, 'OK'),
+                                                      child: const Text('OK'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: const Text('YES'),
                                         ),
                                       ],
                                     ),
                                   );
+                                } else {
+                                  if (await _saveImage(_imageFile!.path)) {
+                                    Navigator.popAndPushNamed(context, '/');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('post Uploaded'),
+                                      ),
+                                    );
+                                  } else {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                        titleTextStyle:
+                                            const TextStyle(color: Colors.red),
+                                        title: const Text('Error'),
+                                        content: const Text('Please try again'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, 'OK'),
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
                                 }
                               } else {
                                 showDialog<String>(
