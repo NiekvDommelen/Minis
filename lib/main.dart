@@ -311,7 +311,7 @@ class HomePageState extends State<HomePage> {
         backgroundColor: const Color.fromARGB(58, 255, 255, 255),
         title: const Text(
           'Minis',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color.fromARGB(255, 255, 89, 0)),
         ),
       ),
       body: Column(
@@ -390,7 +390,7 @@ class HomePageState extends State<HomePage> {
                           height: 50,
                           width: screenWidth - 240,
                           child: DropdownButton<String>(
-                            padding: EdgeInsets.fromLTRB(20, 5, 0, 0),
+                            padding: const EdgeInsets.fromLTRB(20, 5, 0, 0),
                             value: selectedSearchLocation,
                             onChanged: (newValue) {
                               setState(() {
@@ -533,7 +533,10 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _SwitchPage,
+        splashColor: const Color.fromARGB(255, 255, 89, 0),
+        backgroundColor: const Color.fromARGB(155, 55, 55, 55),
+        foregroundColor: const Color.fromARGB(255, 255, 89, 0),
+        onPressed: _switchPage,
         child: const Icon(Icons.add_box),
       ),
     );
@@ -637,7 +640,9 @@ class UploadPageState extends State<UploadPage> {
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Upload mini'),
+          backgroundColor: const Color.fromARGB(255, 255, 89, 0),
+          foregroundColor: Colors.white,
+          title: const Text('Upload mini', style: TextStyle(color: Colors.white),),
         ),
         body: Column(
           children: [
@@ -725,6 +730,7 @@ class UploadPageState extends State<UploadPage> {
                         ? Column(
                             children: [
                               ElevatedButton(
+                                style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(const Color.fromARGB(255, 255, 89, 0))),
                                 onPressed: _takePicture,
                                 child: const Text('Open Camera'),
                               ),
