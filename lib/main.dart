@@ -65,6 +65,7 @@ class HomePageState extends State<HomePage> {
           showDialog<String>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
+              backgroundColor: const Color.fromARGB(150, 100, 100, 100),
               actionsPadding: EdgeInsets.zero,
               contentPadding: EdgeInsets.zero,
               titleTextStyle:
