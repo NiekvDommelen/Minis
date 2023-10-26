@@ -594,7 +594,7 @@ class UploadPageState extends State<UploadPage> {
 
     final request = http.MultipartRequest('POST', url);
 
-    request.fields["title"] = Title;
+    request.fields["title"] = title;
     request.fields["licence"] = licence;
     request.fields["location"] = location;
     request.files.add(
