@@ -273,8 +273,7 @@ class HomePageState extends State<HomePage> {
           elementList.insert(0, _addElement(title, location, path, licence));
         }
       });
-      //TODO: remove debug!!
-      print(" ${DateTime.timestamp()} : '\x1B[33mupdated with search\x1B[0m'");
+
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
@@ -832,7 +831,7 @@ class UploadPageState extends State<UploadPage> {
                                   _titleController.text != "" &&
                                   selectedLocation != " ") {
 
-                                print("result: ${await _licenceDuplicateCheck()}");
+
 
                                 if (await _licenceDuplicateCheck()) {
                                   showDialog<String>(
@@ -929,7 +928,7 @@ class UploadPageState extends State<UploadPage> {
                                         const TextStyle(color: Colors.red),
                                     title: const Text('Error'),
                                     content: const Text(
-                                        'Please dont leave any input field empty.'),
+                                        "Please don't leave any input field empty."),
                                     actions: <Widget>[
                                       TextButton(
                                         onPressed: () =>
