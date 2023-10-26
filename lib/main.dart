@@ -585,7 +585,7 @@ class UploadPageState extends State<UploadPage> {
   }
 
   Future<bool> _saveImage(String path) async {
-    String Title = _titleController.text;
+    String title = _titleController.text;
     String licence = _licenceController.text;
     String location = selectedLocation;
 
