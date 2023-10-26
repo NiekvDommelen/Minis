@@ -288,37 +288,6 @@ class HomePageState extends State<HomePage> {
     _updateListWithSearch();
   }
 
-  //TODO: Remove unused function
-  void _updateList() async {
-    final response = await http.get(Uri.parse('http://simplexflow.nl/minis/'));
-    elementList.clear();
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      final data = jsonDecode(response.body);
-      for (var i = 0; i < data.length; i++) {
-        var data2 = data[i];
-
-        setState(() {
-          // Clear the list before adding new elements
-          // Access specific values using keys
-          String location = data2["location"];
-          String title = data2["title"];
-          String pathData = data2["path"];
-          String path = 'http://simplexflow.nl/$pathData';
-          String licence = data2["licence"];
-
-          // Create widgets or perform any other actions with the extracted data
-          elementList.insert(0, _addElement(title, location, path, licence));
-        });
-      }
-      print(" ${DateTime.timestamp()} : '\x1B[33mupdated\x1B[0m'");
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to reach server');
-    }
-  }
 
   @override
   void didChangeDependencies() {
