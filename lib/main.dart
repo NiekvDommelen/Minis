@@ -434,7 +434,7 @@ class HomePageState extends State<HomePage> {
                         )
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Row(
@@ -448,7 +448,7 @@ class HomePageState extends State<HomePage> {
                                     MaterialStateProperty.all<Color>(
                                         const Color.fromARGB(255, 255, 89, 0)),
                                 shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
+                                    const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(10)),
                                   side: BorderSide.none,
