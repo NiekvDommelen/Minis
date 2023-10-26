@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Minis',
       theme: ThemeData(
         textTheme: const TextTheme(
           displayLarge: TextStyle(
@@ -65,6 +65,7 @@ class HomePageState extends State<HomePage> {
           showDialog<String>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
+              backgroundColor: const Color.fromARGB(150, 100, 100, 100),
               actionsPadding: EdgeInsets.zero,
               contentPadding: EdgeInsets.zero,
               titleTextStyle:
@@ -215,7 +216,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  void _SwitchPage() async {
+  void _switchPage() async {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const UploadPage()),
@@ -272,8 +273,7 @@ class HomePageState extends State<HomePage> {
           elementList.insert(0, _addElement(title, location, path, licence));
         }
       });
-      //TODO: remove debug!!
-      print(" ${DateTime.timestamp()} : '\x1B[33mupdated with search\x1B[0m'");
+
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
@@ -288,37 +288,6 @@ class HomePageState extends State<HomePage> {
     _updateListWithSearch();
   }
 
-  //TODO: Remove unused function
-  void _updateList() async {
-    final response = await http.get(Uri.parse('http://simplexflow.nl/minis/'));
-    elementList.clear();
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      final data = jsonDecode(response.body);
-      for (var i = 0; i < data.length; i++) {
-        var data2 = data[i];
-
-        setState(() {
-          // Clear the list before adding new elements
-          // Access specific values using keys
-          String location = data2["location"];
-          String title = data2["title"];
-          String pathData = data2["path"];
-          String path = 'http://simplexflow.nl/$pathData';
-          String licence = data2["licence"];
-
-          // Create widgets or perform any other actions with the extracted data
-          elementList.insert(0, _addElement(title, location, path, licence));
-        });
-      }
-      print(" ${DateTime.timestamp()} : '\x1B[33mupdated\x1B[0m'");
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to reach server');
-    }
-  }
 
   @override
   void didChangeDependencies() {
@@ -336,14 +305,13 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color.fromARGB(58, 255, 255, 255),
         title: const Text(
           'Minis',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color.fromARGB(255, 255, 89, 0)),
         ),
       ),
       body: Column(
@@ -422,7 +390,7 @@ class HomePageState extends State<HomePage> {
                           height: 50,
                           width: screenWidth - 240,
                           child: DropdownButton<String>(
-                            padding: EdgeInsets.fromLTRB(20, 5, 0, 0),
+                            padding: const EdgeInsets.fromLTRB(20, 5, 0, 0),
                             value: selectedSearchLocation,
                             onChanged: (newValue) {
                               setState(() {
@@ -466,7 +434,7 @@ class HomePageState extends State<HomePage> {
                         )
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Row(
@@ -480,7 +448,7 @@ class HomePageState extends State<HomePage> {
                                     MaterialStateProperty.all<Color>(
                                         const Color.fromARGB(255, 255, 89, 0)),
                                 shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
+                                    const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(10)),
                                   side: BorderSide.none,
@@ -565,7 +533,10 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _SwitchPage,
+        splashColor: const Color.fromARGB(255, 255, 89, 0),
+        backgroundColor: const Color.fromARGB(155, 55, 55, 55),
+        foregroundColor: const Color.fromARGB(255, 255, 89, 0),
+        onPressed: _switchPage,
         child: const Icon(Icons.add_box),
       ),
     );
@@ -614,7 +585,7 @@ class UploadPageState extends State<UploadPage> {
   }
 
   Future<bool> _saveImage(String path) async {
-    String Title = _titleController.text;
+    String title = _titleController.text;
     String licence = _licenceController.text;
     String location = selectedLocation;
 
@@ -623,7 +594,7 @@ class UploadPageState extends State<UploadPage> {
 
     final request = http.MultipartRequest('POST', url);
 
-    request.fields["title"] = Title;
+    request.fields["title"] = title;
     request.fields["licence"] = licence;
     request.fields["location"] = location;
     request.files.add(
@@ -669,7 +640,9 @@ class UploadPageState extends State<UploadPage> {
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Upload mini'),
+          backgroundColor: const Color.fromARGB(255, 255, 89, 0),
+          foregroundColor: Colors.white,
+          title: const Text('Upload mini', style: TextStyle(color: Colors.white),),
         ),
         body: Column(
           children: [
@@ -757,6 +730,7 @@ class UploadPageState extends State<UploadPage> {
                         ? Column(
                             children: [
                               ElevatedButton(
+                                style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(const Color.fromARGB(255, 255, 89, 0))),
                                 onPressed: _takePicture,
                                 child: const Text('Open Camera'),
                               ),
@@ -831,7 +805,7 @@ class UploadPageState extends State<UploadPage> {
                                   _titleController.text != "" &&
                                   selectedLocation != " ") {
 
-                                print("result: ${await _licenceDuplicateCheck()}");
+
 
                                 if (await _licenceDuplicateCheck()) {
                                   showDialog<String>(
@@ -928,7 +902,7 @@ class UploadPageState extends State<UploadPage> {
                                         const TextStyle(color: Colors.red),
                                     title: const Text('Error'),
                                     content: const Text(
-                                        'Please dont leave any input field empty.'),
+                                        "Please don't leave any input field empty."),
                                     actions: <Widget>[
                                       TextButton(
                                         onPressed: () =>
