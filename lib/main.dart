@@ -216,7 +216,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  void _SwitchPage() async {
+  void _switchPage() async {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const UploadPage()),
