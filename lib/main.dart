@@ -4,9 +4,28 @@ import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+class API {
+  late String APIkey;
+
+  API() {
+    APIkey = "";
+    loadData();
+  }
+
+  Future<String> loadData() async {
+    var data = await rootBundle.loadString("assets/key.json");
+
+    var jsonData = json.decode(data);
+    APIkey = jsonData["key"];
+    return "success";
+  }
+
 }
 
 class MyApp extends StatelessWidget {
@@ -55,6 +74,12 @@ class HomePageState extends State<HomePage> {
   List<Widget> elementList = [];
 
   var boolFilter = false;
+
+
+  API api = API();
+
+
+
 
   Widget _addElement(
       String title, String location, String path, String licence) {
@@ -227,7 +252,7 @@ class HomePageState extends State<HomePage> {
     path = "path=..${path.split("..")[1]}";
 
     final url = Uri.parse(
-        "http://simplexflow.nl/minis/?$path"); //http://simplexflow.nl/minis/   http://10.59.138.58:8080/
+        "http://simplexflow.nl/minis/?$path&key=${api.APIkey}");
 
     final response = await http.delete(url);
 
@@ -247,10 +272,12 @@ class HomePageState extends State<HomePage> {
     var licence = _licenceSearchController.text;
     var location = selectedSearchLocation;
 
+    if(api.APIkey == ""){
+      await api.loadData();
+    }
+
     final url = Uri.parse(
-        "http://10.59.138.158:8080?title=$title&licence=$licence&location=$location"); //http://simplexflow.nl/minis/
-    //TODO: remove debug!!
-    print(url);
+        "http://simplexflow.nl/minis/?title=$title&licence=$licence&location=$location&key=${api.APIkey}"); //http://simplexflow.nl/minis/
     final response = await http.get(url);
     elementList.clear();
     if (response.statusCode == 200) {
@@ -562,6 +589,8 @@ class UploadPageState extends State<UploadPage> {
 
   File? _imageFile;
 
+  API api = API();
+
   Future<void> _takePicture() async {
     const imageSrc = ImageSource.camera;
     final imageFile = await ImagePicker().pickImage(source: imageSrc);
@@ -597,6 +626,7 @@ class UploadPageState extends State<UploadPage> {
     request.fields["title"] = title;
     request.fields["licence"] = licence;
     request.fields["location"] = location;
+    request.fields["key"] = "${api.APIkey}";
     request.files.add(
       await http.MultipartFile.fromPath(
           'file', // 'file' is the name of the field that will receive the file
@@ -615,8 +645,8 @@ class UploadPageState extends State<UploadPage> {
   Future<bool> _licenceDuplicateCheck() async{
 
     String licence = _licenceController.text;
-    final url = Uri.parse("http://10.59.138.158:8080");
-    final response = await http.post(url, body: {"licence": licence});
+    final url = Uri.parse("http://simplexflow.nl/minis/");
+    final response = await http.post(url, body: {"licence": licence, "key": "${api.APIkey}"});
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
